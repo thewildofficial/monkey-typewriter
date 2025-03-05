@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money With A Typewriter - Infinite Monkey Theorem Simulator</title>
+  <meta name="description" content="A fun simulation of the Infinite Monkey Theorem where monkeys randomly typing eventually produce Shakespeare">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div class="theme-toggle">
+    <input type="checkbox" id="theme-switch" class="theme-switch">
+    <label for="theme-switch" class="theme-switch-label">
+      <span class="theme-switch-icon">🌙</span>
+      <span class="theme-switch-icon">☀️</span>
+    </label>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <span class="monkey-animation">🐒</span>
+      <span class="typewriter">⌨️</span>
+    </div>
+    <h1>Money With A Typewriter</h1>
+    <p class="tagline">Infinite Monkey Theorem Simulator</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-header">
+        <h2>Input Parameters</h2>
+        <div class="tooltip" data-tooltip="Configure your simulation parameters here">
+          <span class="info-icon">ℹ️</span>
+        </div>
+      </div>
+
+      <div class="input-container">
+        <label for="paragraph">Text to match:</label>
+        <div class="fancy-textarea-container">
+          <textarea id="paragraph" rows="4" placeholder="Enter text for the monkey to type (e.g., 'To be or not to be')"></textarea>
+          <div class="character-count">Characters: <span id="char-count">0</span></div>
+        </div>
+        <p class="helper-text">The monkey will try to randomly type this text</p>
+      </div>
+
+      <div class="input-container">
+        <label for="alphabet">Alphabet:</label>
+        <div class="input-with-icon">
+          <input type="text" id="alphabet" value="abcdefghijklmnopqrstuvwxyz ,.!?" placeholder="Characters the monkey can type">
+          <span class="input-icon">🔤</span>
+        </div>
+        <p class="helper-text">Characters the monkey can use (size: <span id="alphabet-size">30</span>)</p>
+      </div>
+
+      <div class="controls-grid">
+        <div class="input-container">
+          <label for="speed">Typing speed (characters per second):</label>
+          <div class="range-with-value">
+            <input type="range" id="speed" min="1" max="100" value="10" class="slider">
+            <span class="speed-display"><span id="speed-value">10</span> cps</span>
+          </div>
+          <p class="helper-text">Expected time: <span id="time-estimate">calculating...</span></p>
+        </div>
+      </div>
+
+      <div class="probability-explanation">
+        <p>For an alphabet of size <span id="math-alphabet-size">30</span>, the expected number of attempts 
+        before each correct character is <span id="math-expected">30</span>. The probability of randomly matching 
+        your text is <span id="total-probability">0.000000</span>, with <span id="text-length">0</span> characters 
+        in your text.</p>
+      </div>
+
+      <div class="button-container">
+        <button id="start-button" class="primary-button">
+          <i class="fas fa-play button-icon"></i> Start Simulation
+        </button>
+        <button id="reset-button" class="secondary-button">
+          <i class="fas fa-undo button-icon"></i> Reset
+        </button>
+      </div>
+    </section>
+
+    <section id="simulation-section" class="card hidden">
+      <h2>Simulation in Progress</h2>
+
+      <div class="simulation-details">
+        <div class="timer-container">
+          <span class="timer-icon">⏱️</span>
+          <span class="timer-value" id="timer">00:00:00</span>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <span id="progress-percent">0%</span>
+        </div>
+
+        <div class="keystroke-counter">
+          <span class="keystroke-icon">⌨️</span>
+          <span class="keystroke-value" id="current-keystrokes">0</span>
+        </div>
+      </div>
+
+      <div class="display-container">
+        <div class="display-panel">
+          <div class="panel-header">
+            <span class="panel-title">Target Text</span>
+          </div>
+          <div id="target-paragraph" class="panel-content"></div>
+        </div>
+
+        <div class="display-panel">
+          <div class="panel-header">
+            <span class="panel-title">Typing Stream</span>
+            <button id="auto-scroll-toggle" class="toggle-button active" title="Toggle auto-scroll">
+              <i class="fas fa-scroll"></i>
+            </button>
+          </div>
+          <div id="typing-stream" class="panel-content"></div>
+        </div>
+      </div>
+
+      <div class="simulation-controls">
+        <button id="pause-button" class="control-button">
+          <i class="fas fa-pause button-icon"></i> Pause
+        </button>
+        <button id="speed-up-button" class="control-button">
+          <i class="fas fa-forward button-icon"></i> Speed Up (2x)
+        </button>
+      </div>
+    </section>
+
+    <section id="stats-section" class="card hidden">
+      <h2>Simulation Results</h2>
+
+      <div class="result-summary">
+        <span class="monkey-result-icon">🐒</span>
+        <span class="result-message">Success! The monkey has completed the text.</span>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-box">
+          <span class="stat-icon">⏱️</span>
+          <p class="stat-label">Total Time</p>
+          <p class="stat-value" id="total-time">00:00:00</p>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-icon">⌨️</span>
+          <p class="stat-label">Total Keystrokes</p>
+          <p class="stat-value" id="total-keystrokes">0</p>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-icon">📊</span>
+          <p class="stat-label">Keystrokes per Character</p>
+          <p class="stat-value" id="keystrokes-per-char">0</p>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-icon">🧮</span>
+          <p class="stat-label">Expected Average</p>
+          <p class="stat-value" id="expected-keystrokes">0</p>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h3>Keystrokes per Character</h3>
+        <canvas id="keystrokes-chart"></canvas>
+      </div>
+
+      <div class="stats-explanation">
+        <p>Expected Tries: With an alphabet of <span id="expected-tries">26</span> characters, it should take an average of <span id="expected-tries">26</span> attempts to randomly hit each correct character.</p>
+      </div>
+
+      <div class="button-container">
+        <button id="share-results" class="primary-button">
+          <i class="fas fa-share-alt button-icon"></i> Share Results
+        </button>
+        <button id="reset-button" class="secondary-button">
+          <i class="fas fa-undo button-icon"></i> New Simulation
+        </button>
+      </div>
+
+      <div class="multiple-runs">
+        <h3>Run Multiple Simulations</h3>
+        <div class="input-container">
+          <label for="num-runs">Number of Simulations:</label>
+          <input type="number" id="num-runs" value="100" min="1" max="1000">
+          <p class="helper-text">Running many simulations helps us see the probability distribution</p>
+        </div>
+        
+        <button id="multi-run-button" class="secondary-button">
+          <i class="fas fa-play-circle button-icon"></i> Run Simulations
+        </button>
+        
+        <div class="loading-indicator hidden">
+          <div class="loading-spinner"></div>
+          <p>Running simulations... <span id="run-progress">0</span>/<span id="run-total">100</span></p>
+        </div>
+        
+        <div class="multi-run-stats hidden">
+          <h3>Statistical Summary</h3>
+          <div class="stats-container">
+            <div class="stat-box">
+              <span class="stat-icon">📊</span>
+              <p class="stat-label">Mean Keystrokes</p>
+              <p class="stat-value" id="mean-keystrokes">0</p>
+            </div>
+            
+            <div class="stat-box">
+              <span class="stat-icon">📏</span>
+              <p class="stat-label">Standard Deviation</p>
+              <p class="stat-value" id="std-dev">0</p>
+            </div>
+            
+            <div class="stat-box">
+              <span class="stat-icon">🧮</span>
+              <p class="stat-label">Theoretical Expected</p>
+              <p class="stat-value" id="theoretical-expected">0</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="multi-run-chart hidden">
+          <h3>Distribution of Total Keystrokes</h3>
+          <canvas id="multi-run-chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="fun-facts" class="card">
+      <h2>Fun Facts about the Infinite Monkey Theorem</h2>
+      <div class="fact-container">
+        <div class="fun-fact">
+          <h3>Did you know?</h3>
+          <p>The Infinite Monkey Theorem states that a monkey hitting keys at random on a typewriter for an infinite amount of time will almost surely type any given text, such as the complete works of Shakespeare.</p>
+        </div>
+        <div class="fun-fact">
+          <h3>Real Experiment</h3>
+          <p>In 2003, researchers at Plymouth University left six macaques with a computer for a month. The monkeys produced five pages of text, mainly consisting of the letter 'S', but failed to type anything resembling English.</p>
+        </div>
+        <div class="fun-fact">
+          <h3>Mathematical Reality</h3>
+          <p>The probability of a monkey typing the complete works of Shakespeare is so small that it would likely take far longer than the age of the universe to occur.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="notification" class="notification">
+    <div class="notification-content">
+      <span class="notification-icon">📢</span>
+      <span class="notification-message">This is a notification message</span>
+    </div>
+  </div>
+
+  <div id="confetti-container" class="confetti-container"></div>
+
+  <footer>
+    <p>Created with 🐒 and ⌨️ | <a href="https://github.com/thewildofficial/monkey-typewriter" target="_blank">View on GitHub</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
