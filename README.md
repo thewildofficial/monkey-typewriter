@@ -2,11 +2,11 @@
 
 A fun, interactive simulation of the famous "Infinite Monkey Theorem" which states that a monkey hitting keys at random on a typewriter keyboard for an infinite amount of time will eventually type any given text.
 
-![Monkey Typewriter Simulation](https://via.placeholder.com/800x400?text=Monkey+Typewriter+Simulation)
+[![Monkey Typewriter Simulation]](https://thewildofficial.github.io/monkey-typewriter/)
 
 ## Live Demo
 
-Visit the live demo [here](https://github.com/thewildofficial/money-typewriter.git) (replace with your GitHub Pages URL once deployed).
+Visit the live demo [[here](https://github.com/thewildofficial/money-typewriter.git)](https://thewildofficial.github.io/monkey-typewriter/) (replace with your GitHub Pages URL once deployed).
 ## Features
 
 - **Interactive Simulation**: Input your own paragraph and watch a virtual "monkey" randomly type letters to match it
